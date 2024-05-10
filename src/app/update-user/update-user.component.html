@@ -1,34 +1,36 @@
-
-  <!DOCTYPE html>
-  <html lang="en" dir="ltr">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title> Modifier un utilisateur</title> 
-      
-     </head>
-  <body>
-    <div class="wrapper">
-      <h2>Modifier un utilisateur</h2>
-      <form>
-        <div class="form-group">
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier un utilisateur</title>
+</head>
+<body>
+  <div class="wrapper">
+    <h2>Modifier un utilisateur</h2>
+    <form (ngSubmit)="updateUser()">
+      <div class="form-group">
         <div class="input-box">
-          <input type="text" [(ngModel)]="currentUser.id" name="idUser" class="form-control" readonly>
+          <input type="text" [(ngModel)]="currentUser.email" name="email" class="form-control">
         </div>
         <div class="input-box">
           <input type="text" [(ngModel)]="currentUser.name" name="username" class="form-control">
         </div>
         <div class="input-box">
-          <input type="text" [(ngModel)]="currentUser.email" name="email" class="form-control">
+          <input type="text" [(ngModel)]="currentUser.cin" name="cin" class="form-control">
         </div>
-       
-       
+        <div class="input-box">
+          <input type="date" [(ngModel)]="currentUser.datenais" name="datenais" class="form-control">
+        </div>
+        <div class="input-box">
+          <input type="text" [(ngModel)]="currentUser.lieunais" name="lieunais" class="form-control">
+        </div>
+        <input type="file" (change)="onFileSelected($event)" name="img">
       </div>
-        <div class="input-box button">
-          <input type="Submit" (click)="updateUser()" value="Modifier" style="color:white">
-        </div>
-        
-      </form>
-    </div>
-  </body>
-  </html>
+      <div class="input-box button">
+        <input type="submit" value="Modifier" style="color:white">
+      </div>
+    </form>
+  </div>
+</body>
+</html>

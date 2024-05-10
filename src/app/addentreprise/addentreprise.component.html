@@ -1,0 +1,18 @@
+<div class="login-page">
+    <div class="form">
+      <form class="login-form" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+        <input type="text" placeholder="Name" [(ngModel)]="newEntreprise.name" name="name">
+        <input type="email" placeholder="adresse" [(ngModel)]="newEntreprise.adresse" name="adresse">
+        <input type="text" placeholder="secteuractivite" [(ngModel)]="newEntreprise.secteuractivite" name="secteuractivite">
+        <input type="text" placeholder="Matricule" [(ngModel)]="newEntreprise.Matricule" name="Matricule">
+        <input type="text" placeholder="ville" [(ngModel)]="newEntreprise.ville" name="ville">
+        <input type="text" placeholder="siegesociale" [(ngModel)]="newEntreprise.siegesociale" name="siegesociale">
+        <input type="text" placeholder="codeTVA" [(ngModel)]="newEntreprise.codeTVA" name="codeTVA">
+        <input type="file" (change)="onFileSelected($event)" name="logo">
+        <div>
+          <button type="submit" class="btn btn-success">Ajout Entreprise</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  

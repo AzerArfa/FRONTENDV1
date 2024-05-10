@@ -1,41 +1,89 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../services/user.service';
-import { User } from '../model/user.model';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-update-user',
   templateUrl: './update-user.component.html',
   styleUrls: ['./update-user.component.css']
 })
-export class UpdateUserComponent implements OnInit{
+export class UpdateUserComponent implements OnInit {
+  currentUser: any = {
+    email: '',
+    name: '',
+    cin: '',
+    datenais: '',
+    lieunais: ''
+  };
+  selectedFile: File | null = null;
 
-  currentUser: User = new User();
-
-  constructor(private activatedRoute : ActivatedRoute,private router : Router , private userService : UserService){}
-
-
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private userService: UserService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
-      let userId = params['id'];
+      const userId = params['id'];
       this.userService.getUserById(userId).subscribe(
-        (data: User) => { // Ensure the data type is User
+        (data: any) => {
           this.currentUser = data;
+          if (this.currentUser.datenais) {
+            // Convert the date string to the correct format for input[type="date"]
+            const date = new Date(this.currentUser.datenais);
+            if (!isNaN(date.getTime())) {
+              this.currentUser.datenais = this.formatDate(date);
+            } else {
+              console.error('Invalid date format:', this.currentUser.datenais);
+            }
+          }
         },
         error => console.error(error)
       );
     });
   }
 
+  formatDate(date: Date): string {
+    const day = ('0' + date.getDate()).slice(-2);
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+
   updateUser(): void {
-    this.userService.updateUser(this.currentUser).subscribe(
-      data => {
-        console.log('User updated successfully!');
-        this.router.navigate(['/users']);
+    const formData: FormData = new FormData();
+    formData.append('email', this.currentUser.email);
+    formData.append('name', this.currentUser.name);
+    formData.append('cin', this.currentUser.cin);
+    formData.append('datenais', this.currentUser.datenais);
+    formData.append('lieunais', this.currentUser.lieunais);
+
+    if (this.selectedFile) {
+      formData.append('img', this.selectedFile, this.selectedFile.name);
+    }
+
+    this.userService.updateUser(this.currentUser.id, formData).subscribe(
+      (response: any) => {
+        console.log('User updated successfully', response);
+
+        // Emit the user change event
+        this.userService.userUpdated.emit(response);
+
+        // Navigate to dummy route and back to force navbar reload
+        this.router.navigate(['/navbar']).then(() => {
+          this.router.navigate([`/profile/${this.currentUser.id}`]);
+        });
       },
-      error => console.error(error)
+      error => {
+        console.error('Error updating user', error);
+      }
     );
   }
 
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0];
+  }
 }

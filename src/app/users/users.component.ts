@@ -9,12 +9,13 @@ import { UserService } from '../services/user.service';
 })
 export class UsersComponent implements OnInit {
   users: User[] = [];
-
+  allUsers! : User[];
   constructor(private userService: UserService) { }
-
+  nomUser! :string;
   ngOnInit(): void {
     this.userService.listeUsers().subscribe(data => {
       this.users = data;
+      this.allUsers = data; // Update allUsers property here
     });
   }
 
@@ -40,11 +41,32 @@ export class UsersComponent implements OnInit {
     return user.roles.map(role => role.name).join(', ');
   }
 
-  onKeyUp(searchTerm: string): void {
-    // Implement search functionality here
-  }
+  onKeyUp(filterText : string){
+    this.users = this.allUsers.filter(item =>
+    item.name?.toLowerCase().includes(filterText));
+    }
 
-  supprimerUser(userId: string): void {
-    // Implement delete functionality here
-  }
+    rechercherUsers(){
+      this.userService.rechercherParNom(this.nomUser).
+        subscribe(users => {
+      this.users = users; 
+      console.log(users)});
+    }
+
+    supprimerUser(id: string): void {
+      console.log('Deleting user with ID:', id);
+      let conf = confirm("Etes-vous sur ?");
+      if (conf) {
+        this.userService.supprimerUser(id).subscribe(() => {
+          console.log('User deleted successfully');
+          window.location.reload(); // Reload the page after successful deletion
+        }, (error) => {
+          console.warn('Error deleting user:', error); // Log as warning instead of error
+          window.location.reload(); // Reload the page even if an error occurs
+        });
+      }
+    }
+    
+    
+    
 }

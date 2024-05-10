@@ -1,103 +1,98 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { EventEmitter, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { User } from '../model/user.model';
 import { AuthService } from './auth.service';
 import { authApiURL } from '../config';
+import { Entreprise } from '../model/entreprise.model';
 
 const httpOptions = {
-  headers: new HttpHeaders( {'Content-Type': 'application/json'} )
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private apiUrl = authApiURL+'/user';
-  
+  private apiUrl = authApiURL + '/user';
 
-  users! : User[];
-  user! : User;
+  public isupdatedSubject = new BehaviorSubject<boolean>(false);
+  public isupdated = this.isupdatedSubject.asObservable();
 
-  constructor(private http : HttpClient, private authService : AuthService) {
+  userUpdated: EventEmitter<User> = new EventEmitter<User>();
+  users!: User[];
+  user!: User;
 
-  /*   this.users = [
-      {idUser : 1, username: "TouwaAbb", password:"123", email : "touwa@gmail.com", societe : "sasLab", roles:['ADMIN'], dateCreationCpt : new Date("2024/04/23")},
-      {idUser : 2, username: "Azer01", password:"123", email : "azer@gmail.com", societe : "sasLab", roles:['ADMIN'], dateCreationCpt : new Date("2024/04/23")},
-      {idUser : 3, username: "Moha20", password:"123", email : "moha@gmail.com", societe : "sasLab", roles:['USER'], dateCreationCpt : new Date("2024/04/24")},
-      
-    ]; */
-  }
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
-  /* listeUsers(): User[]{
-    return this.users;
-  } */
   listeUsers(): Observable<User[]> {
-    return this.http.get<User[]>(authApiURL+'/users');
+    return this.http.get<User[]>(authApiURL + '/users');
   }
 
-  /* ajouterUser(user : User){
-    this.users.push(user);
-  } */
-
-  ajouterUser( user: User):Observable<User>{
+  ajouterUser(user: User): Observable<User> {
     let jwt = this.authService.getToken();
-    jwt = "Bearer "+jwt;
-    let httpHeaders = new HttpHeaders({"Authorization":jwt}) 
-      return this.http.post<User>(authApiURL+"/signup", user, {headers:httpHeaders});
-    }
+    jwt = "Bearer " + jwt;
+    let httpHeaders = new HttpHeaders({ "Authorization": jwt });
+    return this.http.post<User>(authApiURL + "/signup", user, { headers: httpHeaders });
+  }
 
-    signup(formData: FormData): Observable<User> {
-      return this.http.post<User>(authApiURL+'/signup', formData)
-    }
+  signup(formData: FormData): Observable<User> {
+    return this.http.post<User>(authApiURL + '/signup', formData)
+  }
+  
+   addEntreprise(userId: string, formData: FormData): Observable<any> {
+    const url = `${this.apiUrl}/${userId}/add-entreprise`;
+    return this.http.post<any>(url, formData, {
+      headers: new HttpHeaders({
+        'Accept': 'application/json'
+      })
+    });
+  }
   
 
-//   supprimerUser(user : User){
-//    const index = this.users.indexOf(user, 0);
-//    if(index > -1){
-//      this.users.splice(index, 1);
-//    }
-//  } 
-
-  supprimerUser(id : string):Observable<User> {
+  supprimerUser(id: string): Observable<User> {
     return this.http.delete<User>(`${authApiURL}/delete/${id}`);
-    }
+  }
 
-    consulterUser(id : string):Observable<User> {
-      return this.http.get<User>(`${authApiURL}/user/${id}`);
-      }
+  consulterUser(id: string): Observable<User> {
+    return this.http.get<User>(`${authApiURL}/user/${id}`);
+  }
 
   getUserById(userId: string): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/${userId}`);
+    return this.http.get<User>(`${authApiURL}/user/${userId}`).pipe(
+      tap(user => {
+        console.log('Fetched User:', user);
+        return user;
+      })
+    );
   }
 
-  trierUsers(){
-    this.users = this.users.sort( (n1, n2) => {
-      if(n1.id! > n2.id!){
+  trierUsers() {
+    this.users = this.users.sort((n1, n2) => {
+      if (n1.id! > n2.id!) {
         return 1;
-      }if(n1.id! < n2.id!){
+      } if (n1.id! < n2.id!) {
         return -1;
       }
       return 0;
     });
   }
 
-  updateUser(user: User): Observable<any> {
-    const url = `${authApiURL}/updateuser/${user.id}`; // Assuming updateUser is the endpoint
-    return this.http.put(url, user);
+  updateUser(id: string, formData: FormData): Observable<any> {
+    const url = `${authApiURL}/updateuser/${id}`;
+    return this.http.put(url, formData).pipe(
+      tap((updatedUser: any) => {
+        console.log('Updated user from backend:', updatedUser); // Debugging
+        this.isupdatedSubject.next(true);
+        this.userUpdated.emit(); // Emit event when user is updated
+        this.authService.refreshUserInfo(updatedUser); // Refresh token and user info
+        console.log('User info refreshed with new data.'); // Debugging
+      })
+    );
   }
 
   rechercherParNom(term: string): Observable<any> {
     return this.http.get(`${authApiURL}/users/${term}`);
   }
-  
-
-  // rechercherParNom(nom: string):Observable< User[]> {
-  //   const url = `8081/userssByName/${nom}`;
-  //   return this.http.get<User[]>(url);
-  //   }
-
-
 }

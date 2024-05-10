@@ -2,10 +2,10 @@ import { User } from "./user.model";
 
 export class Entreprise {
     id!: string;
-    nom!: string;
+    name!: string;
     adresse!: string;
     secteuractivite!: string;
-    Matricule!: string; 
+    matricule!: string; 
     ville!: string;
     siegesociale!: string;
     codeTVA!: string;

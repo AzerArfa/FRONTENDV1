@@ -44,7 +44,7 @@ export class SignUpComponent  {
 
     this.userService.signup(formData).subscribe(response => {
       console.log('User signed up successfully', response);
-      this.router.navigate(['/users']);
+      this.router.navigate(['/login']);
     }, error => {
       console.error('Error signing up user', error);
     });

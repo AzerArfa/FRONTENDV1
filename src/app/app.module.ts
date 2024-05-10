@@ -17,8 +17,10 @@ import { RecaptchaModule } from 'ng-recaptcha';
 import { ProfileComponent } from './profile/profile.component';
 import { RechercheUsersComponent } from './recherche-users/recherche-users.component';
 import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
-import { TokenInterceptor } from './services/token.interceptor';
 import { UserService } from './services/user.service';
+import { AuthInterceptor } from './services/auth.interceptor';
+import { NavbarComponent } from './navbar/navbar.component';
+import { AddentrepriseComponent } from './addentreprise/addentreprise.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +34,9 @@ import { UserService } from './services/user.service';
     UpdateUserComponent,
     SignUpComponent,
     ProfileComponent,
-    RechercheUsersComponent
+    RechercheUsersComponent,
+    NavbarComponent,
+    AddentrepriseComponent
   ],
   imports: [
     BrowserModule,
@@ -44,9 +48,8 @@ import { UserService } from './services/user.service';
   providers: [
     HttpClient,
     UserService,
-    { provide : HTTP_INTERCEPTORS,
-      useClass : TokenInterceptor,
-      multi : true}
+    
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

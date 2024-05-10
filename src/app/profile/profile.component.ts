@@ -8,26 +8,39 @@ import { UserService } from '../services/user.service';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent implements OnInit{
-
+export class ProfileComponent implements OnInit {
   currentUser = new User();
 
-  users! : User[];
+  constructor(private activatedRoute: ActivatedRoute, private userService: UserService) {}
 
-  constructor(private activatedRoute : ActivatedRoute, private userService : UserService){}
-
-  
   ngOnInit(): void {
-    // this.currentUser = this.userService.consulterUser(this.activatedRoute.snapshot.params['id']);
-    this.loadCurrentUser();
+    const userId = this.activatedRoute.snapshot.params['id'];
+    this.loadCurrentUser(userId);
   }
 
-  loadCurrentUser(): void {
-    const userId = '14466175-36c7-4a26-9832-f945d938bbc2' ; // Example user ID, replace with the actual user ID
+  loadCurrentUser(userId: string): void {
     this.userService.getUserById(userId)
       .subscribe(user => {
         this.currentUser = user;
+        console.log('User data:', user);
+      }, error => {
+        console.error('Error loading user data:', error);
       });
   }
 
+  formatDate(date: Date): string {
+    if (!date) {
+      return '';
+    }
+
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      console.error('Invalid date:', date);
+      return '';
+    }
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric', month: 'long', day: 'numeric'
+    };
+    return new Intl.DateTimeFormat('fr-FR', options).format(dateObj);
+  }
 }
